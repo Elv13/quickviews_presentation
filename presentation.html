@@ -1,0 +1,4417 @@
+<!DOCTYPE html>
+<!--
+  Copyright 2010 Google Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+  Original slides: Marcin Wichary (mwichary@google.com)
+  Modifications: Ernest Delgado (ernestd@google.com)
+                 Alex Russell (slightlyoff@chromium.org)
+
+  landslide modifications: Adam Zapletal (adamzap@gmail.com)
+                           Nicolas Perriault (nperriault@gmail.com)
+-->
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>A QtQuick framework for visualizing models</title>
+    <!-- Styles -->
+    
+    <link rel="stylesheet" media="print" href="file:///home/lepagee/blogviews2/default/css/print.css">
+    <link rel="stylesheet" media="screen, projection" href="file:///home/lepagee/blogviews2/default/css/screen.css">
+    
+    
+    <!-- /Styles -->
+    <!-- Javascripts -->
+    
+    <script type="text/javascript" src="file:///home/lepagee/blogviews2/default/js/slides.js"></script>
+    
+    
+    <!-- /Javascripts -->
+</head>
+<body>
+  <div id="blank"></div>
+  <div class="presentation">
+    <div id="current_presenter_notes">
+      <div id="presenter_note"></div>
+    </div>
+    <div class="slides">
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>A QtQuick framework for visualizing models</h1></header>
+            
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              1/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Opinion #1</h1></header>
+            
+            
+            <section><p>Back in the QtWidgets days, if you had modelized data, you could tell
+management:</p>
+<ul>
+<li>Yes, I can display it with Qt</li>
+<li>Yes, I can display it, but I need to implement a thing called
+  QtWidgets QAbstractItemView</li>
+</ul>
+<h4>Now we have</h4>
+<ul>
+<li>Yes, the ListView/GridView/TableView will work</li>
+<li>Sorry, Qt doesn't allow to display our data, implementing new views is
+  expensive, let use something else.</li>
+<li>Lets use the Web stack, it can do everything</li>
+</ul>
+<h4>Worst still</h4>
+<p>If you had old, complex and battle tested models and a QtWidgets based GUI,
+you are stuck with a <em>legacy</em> and non-mobile-friendly GUI stack <strong>forever</strong>.</p>
+<p>I see this as a critical issue that prevents current/former customers to use
+the Qt technologies again. It's bad for business, bad for consultants and only
+profit the Web stack, because that's what they will switch to.</p></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              2/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Why?</h1></header>
+            
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              3/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Historical notes</h1></header>
+            
+            
+            <section><p>The old QtWidgets design scaled well because it was simple. You had a single
+"delegate" instance with a QPainter function and the metadata necessary to
+paint at the right position. The size hints were previously determined. Rather
+than after the fact like QML.</p>
+<p>QtQuick uses "declarative" widgets. They are QObjects and created by the engine
+to turn the intent into a GUI visual. It also uses the GPU much more often than
+QtWidgets and tracks many more buffers and objects sent between the CPU and GPU.
+These implementation details make using a single instance painted multiple time
+impractical.</p>
+<p>QtQuick2.ListView and GridView sidestep this problem by ignoring it.
+However it restricts them to the smallest possible subset of the model topology:
+lists. While tables are quite well implemented in Qt 5.12, it took a decade and
+now we have the two simplest model typologies. This wont scale to trees very
+well.</p></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              4/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Opinion #2</h1></header>
+            
+            
+            <section><p>The current upstream view implementation was "rushed" when QML was first
+written as time-to-market was important to stay competitive. Those views at the
+time targeted mobile and embedded and ignored the more complex desktop use
+cases. This made sense from a business point of view and I would have taken
+the same decision, but now there is a technical debt to repay.</p>
+<p>The current view implementation do too many things each classes and they are
+tangled in a web of low level private APIs.</p>
+<p>This design is and was always faster to develop than taking an overly general
+conceptual approach to solve the problem. However it isn't flexible enough to
+be adapter to use cases that were not taken into account when the view was
+coded.</p></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              5/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Why: Limitations of the current QtQuick.Views architecture</h1></header>
+            
+            
+            <section><ul>
+<li>Each class/component do too much, it causes much duplications across views<ul>
+<li>Optimizations are done in the higher layers instead of reusable low-level
+  building blocks</li>
+<li>Some views have slow corner cases, but they are in fact impossible to
+  optimize due to implementation details.</li>
+</ul>
+</li>
+<li>A lot of Qt5 QML components rely on "private" and "QML only" APIs
+  like the QQuickAnchors and internal QtQuick "V4" engine data types</li>
+<li>Existing Qt customers codebase designed for QtWidgets don't fully map into
+  the current QtQuick.Views<ul>
+<li>They might leave the Qt ecosystem if they can't re-use their past
+  investment.</li>
+</ul>
+</li>
+<li>It is "all or nothing". Either the views fit your use case or you can't use
+  QML.<ul>
+<li>If you hit <em>any</em> limitation, the amount of work to ship QML based apps
+  skyrockets.</li>
+</ul>
+</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              6/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Opinion #3</h1></header>
+            
+            
+            <section><p>A large and complex body of code written from scratch to handle modelizations
+and all its corner cases is a better path forward than brute forcing every
+topologies one by one.</p>
+<p>I am not claiming the design described in this document is the only way or the
+sanest one. But I claim it solves the limitations mentioned above.</p></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              7/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>What is this all about?</h1></header>
+            
+            
+            <section><p>In the last year I designed a generic framework to implement custom views for
+Qt models. Since September 1, I worked full time implementing it.</p>
+<p>This work has been sponsored by BlueSystems. It is part of a larger body of work
+allow existing Qt/KDE apps to be ported from QtWidgets to QtQuick without major
+rewrites. This is important for BlueSystems projects such as Plasma Mobile and
+other projects under NDA.</p>
+<p>Since from its inception it duplicates a lot of components provided by QtQuick
+itself, we should investigate what can be shared.</p>
+<p>Even if this ends up a research project and is never upstreamed, there is
+lessons to be learned and maybe some optimizations strategies can make their
+way upstream.</p></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              8/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Table of content</h1></header>
+            
+            
+            <section><ul>
+<li>Goals and scope</li>
+<li>General architecture</li>
+<li>Public API components (adapters)</li>
+<li>Private API state trackers</li>
+<li>Optimization strategies</li>
+<li>Status, demo, timeline, etc</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              9/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Functional goals</h1></header>
+            
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              10/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Functional goals</h1></header>
+            
+            
+            <section><p>The goal is first are foremost to offer a framework to create custom model
+views to be used in QtQuick2 applications.</p>
+<ul>
+<li>Support all model typologies supported by QtWidgets (and more)</li>
+<li>Restore the ability to write views for the existing models in C++</li>
+<li>Deliver fast performance even when using user defined views (without tons
+  of complexity in the view code)</li>
+<li>Allow existing QtWidgets applications to be ported to QtQuick/Kirigami by
+  leveraging their existing models as-is.<ul>
+<li>Potentially allow a migration path such as using raster delegates when
+  it makes sense</li>
+</ul>
+</li>
+<li>Support all technologies (MIME, drag and drop, etc) relevant for the desktop</li>
+<li>Make implementing new views as easy as it can get, hide all complexity</li>
+<li>Provide all the building blocks in the public API to create more views
+  without unmaintainable amount of code duplication</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              11/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Non functional goals</h1></header>
+            
+            
+            <section><ul>
+<li>Do not use Qt private APIs or at least not require them</li>
+<li>Keep strict separation of concerns and small components</li>
+<li>Put hard-line limits on scope creep for each component.<ul>
+<li>If it can be split in half and still compile, then it will be.</li>
+<li>If it adds classes whose sole purpose is to glue smaller ones, then so be
+  it.</li>
+<li>Cache fault and indirection related loss of performance are acceptable
+  given they are irrelevant compared.</li>
+<li>Micro optimization that cause 2 way coupling should not be implemented
+  to QtQuick own overhead.</li>
+</ul>
+</li>
+<li>Get a stable-ish API before 2019</li>
+<li>Split things into smaller "building blocks" and assemble them as late as
+  possible to maximize the future flexibility</li>
+<li>Have more Q_ASSERT in debug mode. Invalid models and mis-coded views should
+  have undefined bahavior in release mode. Garbage in: garbage out. The model
+  developers have to implement them properly.<ul>
+<li>The state machine should fail into their ERROR state when things go wrong</li>
+</ul>
+</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              12/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Code pattern goals</h1></header>
+            
+            
+            <section><ul>
+<li>Use precise state tracking to (try to) optimize away uneeded operations</li>
+<li>"bloat" all the complexity in the lowest layers, never expose complexity in
+  the public API even if doing so requires more complexity</li>
+<li>Have an highly modular "middle" layer on top of the optimizations and make it
+  part of the public API</li>
+<li>Only ever use public APIs to build the "real" views</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              13/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Design process</h1></header>
+            
+            
+            <section><ul>
+<li>Solutions that try to fix everything have inherent "front loaded" complexity.
+  It is an acceptable tradeoff.</li>
+<li>The problem was studied and broken down into:</li>
+<li>Small chunks, represented here by the adapters</li>
+<li>Transactions &amp; life cycles, represented here by state trackers</li>
+<li>Design the public API to scale horizontally in complexity when developers
+  implement custom views</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              14/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Rationals: Why state machines?</h1></header>
+            
+            
+            <section><p>State machine are like gears made out of Adamentium: They are hard to work with,
+but once set, they are indestructible.</p>
+<p><img alt="Adamentium" src="file:///home/lepagee/blogviews2/wolverine-jackman-claws-onehand.jpg" /></p></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              15/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Where state machine make sense?</h1></header>
+            
+            
+            <section><ul>
+<li>Life cycle management</li>
+<li>Viewport frame synchronization</li>
+<li>Cache invalidation events</li>
+<li>Transaction (commit/rollback)</li>
+<li>QtQuick "state:" property synchronization</li>
+<li>Sequence of events (drag&amp;drop, scrolling, inertia)</li>
+</ul>
+<p>Note that they should not be exposed in the public API. The public API
+should be deeply Qt. State machines are not cute.</p></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              16/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Where state machine make sense?</h1></header>
+            
+            
+            <section><p>Each state change should trigger state changes in related state machines.</p>
+<p><img alt="" src="file:///home/lepagee/blogviews2/clock.jpg" /></p>
+<p>This way the whole system should converge toward correctness.</p></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              17/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Why build everything out of LEGO?</h1></header>
+            
+            
+            <section><p>By making sure the top level views are just assembled adapters, the design
+goal of making sure developers can always write custom views cannot regress.</p>
+<p><img alt="LEGO" src="file:///home/lepagee/blogviews2/lego.jpg" /></p></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              18/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>About speed (Q&amp;A)</h1></header>
+            
+            
+            <section><ul>
+<li>All these tiny building blocks and indirection can make things slower: I
+  know. If it becomes a bottleneck, then there is known code transformation
+  to inline much of it. It makes the code less readable so I don't plan to do
+  this until its a necessity</li>
+<li>CPU are good at branch prediction, your code would have been good on an
+  in-order CPU but that era is long gone: I know. I made the choice of using
+  this type of design to minimize the number of "if" (branch) in the code
+  to make it readable and provable. The downside of reducing the number of
+  branch in favor of vTables and callmap is that CPU sucks at them.</li>
+<li>The concept of converging toward correctness often cause many iterations
+  of nonsense: True. This part of the design exist because I failed to make
+  the paging system work. It was too much for me and progress was too slow.
+  Once the framework is feature complete, this can be revisited without
+  breaking the API.</li>
+<li>X or Y is slow: See the planned optimization list. The current state is
+  fast enough to ship and faster than loading everything ahead of time. Future
+  iterations can implement various optimizations.</li>
+<li>You have some API or mode but they don't work: Some code has been written for
+  feature whose design is final. Yet, if I have no use for them and no tests,
+  then the code is most probably incomplete. It's partially implemented where
+  it was trivial to do so when I wrote the code around it. Everything regarding
+  tables and exotic size hint strategies are prime examples.</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              19/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Why start from scratch instead of using Qt APIs.</h1></header>
+            
+            
+            <section><p>All relevant APIs used to build the QtQuick2.ListView are private and having
+applications deeply rely on private APIs was a non-starter. This framework
+only go deep enough so private APIs can be avoided, not any deeper.</p>
+<p>Not all components that were created, like the Flickable), were rewritten
+because of problems in the original, but rather because it wasn't possible to
+build this framework without going this deep.</p></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              20/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Design: Architecture</h1></header>
+            
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              21/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Design: Overview of the layers (1/3)</h1></header>
+            
+            
+            <section><pre><code>              SOME RANDOM QML
+===============================================
+                   VIEWS
+===============================================
+                 ADAPTERS
+===============================================
+              STATE TRACKERS
+</code></pre></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              22/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Design: Overview of the layers (2/3)</h1></header>
+            
+            
+            <section><pre><code>              SOME RANDOM QML &lt;- For normal users/designers/programmers
+===============================================
+                   VIEWS      &lt;- Convenient abstractions users/designers/programmers
+===============================================
+                 ADAPTERS     &lt;- For developers who need custom views
+===============================================
+              STATE TRACKERS  &lt;- Fully internal state machines
+</code></pre></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              23/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Design: Overview of the layers (3/3)</h1></header>
+            
+            
+            <section><ul>
+<li>The views are "prepackaged" groups of adapters to provide a specific behavior</li>
+<li>The adapters are flexible building blocks to assemble fast views<ul>
+<li>They encapsulate the optimizations</li>
+</ul>
+</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              24/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Design of the public API</h1></header>
+            
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              25/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Design: Adapters: Overview</h1></header>
+            
+            
+            <section><p>Core:</p>
+<ul>
+<li>ModelAdapter</li>
+<li>(Abstract)ItemAdapter</li>
+<li>SelectionAdapter</li>
+<li>DecorationAdapter</li>
+<li>ScrollAdapter</li>
+<li>ContextAdapter</li>
+</ul>
+<p>Related:</p>
+<ul>
+<li>ViewBase</li>
+<li>Viewport</li>
+<li>TreeTraversalReflector</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              26/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Design: Adapters: ModelAdapter</h1></header>
+            
+            
+            <section><p><strong>Cardinality:</strong> zero to many per view</p>
+<p><strong>Owner:</strong> The ViewBase</p>
+<p><strong>Roles:</strong></p>
+<ul>
+<li>Attach a model to the other components</li>
+<li>Support replacing the models</li>
+<li>Owns the TreeTraversalReflector, the "core" class that tracks all model
+  events</li>
+</ul>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>Multiple models per view are actually very useful<ul>
+<li>Use the selected item "selection delegate" as a model</li>
+<li>Expose the ListView "categories" as a model</li>
+<li>Expose the List/Table/Tree header as a model</li>
+<li>Expose charts legend or axis as models</li>
+</ul>
+</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              27/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Design: Adapters: (Abstract)ItemAdapter</h1></header>
+            
+            
+            <section><p><strong>Cardinality:</strong> one per <code>ModelAdapter</code></p>
+<p><strong>Owner:</strong> The viewport</p>
+<p><strong>Roles:</strong></p>
+<ul>
+<li>Map the QQuickItem delegate instance to the other components of this framework</li>
+<li>Have many virtual methods the view can implement to handle the life cycle
+  events.</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              28/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Design: Adapters: SelectionAdapter</h1></header>
+            
+            
+            <section><p><strong>Cardinality:</strong> currently one per model adapter, could be many per model adapter
+   if judged to be relevant.</p>
+<p><strong>Owner:</strong> The <code>ModelAdapter</code></p>
+<p><strong>Roles:</strong></p>
+<ul>
+<li>Attach a QItemSelectionModel and map all events</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              29/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Design: Adapters: DecorationAdapter (needs a new name)</h1></header>
+            
+            
+            <section><p><strong>Cardinality:</strong> Created in QML</p>
+<p><strong>Owner:</strong> The QML Item Delegate component</p>
+<p><strong>Roles:</strong></p>
+<ul>
+<li>Convert the content of Qt::DecorationRole and eventually the
+  background/foreground roles to something QML can consume</li>
+</ul>
+<p><strong>Note:</strong></p>
+<ul>
+<li>This is the oldest part of the whole project and may need to be revisited to
+  redefine its scope.</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              30/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Design: Adapters: ContextAdapter</h1></header>
+            
+            
+            <section><p><strong>Cardinality:</strong> Many</p>
+<p><strong>Owner:</strong> Undefined on purpose to allow static instances</p>
+<p><strong>Roles:</strong></p>
+<ul>
+<li>Add a set of Q_PROPERTY to a QQmlContext</li>
+</ul>
+<p><strong>Note:</strong></p>
+<ul>
+<li>Does a lot of QtQuick magic to create new QMetaType at runtime</li>
+<li>The first generation is fast, but memory hungry, a second generation fixes
+  this by using its built-in introspection to create smaller vtables based
+  classes in memory.</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              31/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Design: Adapters: ScrollAdapter</h1></header>
+            
+            
+            <section><p><strong>Cardinality:</strong> One per view</p>
+<p><strong>Owner:</strong> The view</p>
+<p><strong>Roles:</strong></p>
+<ul>
+<li>Consume the internal size hint metadata to create a scrollbar</li>
+<li>Support the ListView categories as a scrollbar "table of content"</li>
+</ul>
+<p><strong>Note:</strong></p>
+<ul>
+<li>The current implementation pre-date many of the components it should use. It
+  works well enough for now, but will need an overhaul in future iterations.</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              32/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Design: ~~Adapters:~~ Viewport</h1></header>
+            
+            
+            <section><p><strong>Cardinality:</strong> Officially one per <code>ModelAdapter</code></p>
+<p><strong>Owner:</strong> The <code>ModelAdapter</code></p>
+<p><strong>Roles:</strong></p>
+<ul>
+<li>Track the edge of which part of the model is visible on screen</li>
+<li>Holds the size hint strategies</li>
+<li>Be the public API of the TreeTraversalReflector</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              33/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Design: ~~Adapters:~~ TreeTraversalReflector</h1></header>
+            
+            
+            <section><p><strong>Cardinality:</strong> One per <code>Viewport</code></p>
+<p><strong>Owner:</strong> The <code>Viewport</code></p>
+<p><strong>Roles:</strong></p>
+<ul>
+<li>Create a projection on a cartesian plan (viewed by the viewport) of the model</li>
+<li>Track all model events</li>
+<li>Drive the state trackers using the model events</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              34/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Design: ~~Adapters:~~ ViewBase</h1></header>
+            
+            
+            <section><p><strong>Cardinality:</strong> None to Many</p>
+<p><strong>Owner:</strong> Is a top level component. Is defined in QML</p>
+<p><strong>Roles:</strong></p>
+<ul>
+<li>Most abstract version of the model view</li>
+<li>Allows multiple models and wierd cardinalities</li>
+</ul>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>Note that some cardinalities are 0-N "because I can" and doing so makes
+   keeping component coupling low easier. The <code>SingleModelViewBase</code> is an
+   higher level API and fits more real-life use cases.</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              35/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Design: ~~Adapters:~~ SingleModelViewBase</h1></header>
+            
+            
+            <section><p><strong>Cardinality:</strong> None to Many</p>
+<p><strong>Owner:</strong> Is a top level component. Is defined in QML</p>
+<p><strong>Roles:</strong></p>
+<ul>
+<li>Collapse uneeded abstractions and cardinalities into something closer to
+   QAbstractItemView.</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              36/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Design of the private API</h1></header>
+            
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              37/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>State trackers: Overview</h1></header>
+            
+            
+            <section><ul>
+<li>Model topology (the rowsMoved transaction and the like)</li>
+<li>Model index metadata (track which part of the model is "tracked")</li>
+<li>View item (the delegate instance life cycle)</li>
+<li>Context (the ever changing values of the roles)</li>
+<li>Geometry (the relative and absolute position in the view)</li>
+<li>proximity (track if the nearby elements are fully loaded)</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              38/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>State trackers: StateTracker::Index</h1></header>
+            
+            
+            <section><p><strong>Purpose:</strong></p>
+<ul>
+<li>Store transient indices during rowsMoved</li>
+</ul>
+<p><strong>States:</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NEW</td>
+<td>Not part of a tree yet</td>
+</tr>
+<tr>
+<td>NORMAL</td>
+<td>There is a valid index and a parent node</td>
+</tr>
+<tr>
+<td>TRANSITION</td>
+<td>Between rowsAbouttoMove and rowsMoved (and removed)</td>
+</tr>
+<tr>
+<td>ROOT</td>
+<td>This is the root element</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Actions:</strong></p>
+<p>N/A</p></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              39/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>State trackers: StateTracker::ModelItem (1/2)</h1></header>
+            
+            
+            <section><p><strong>Purpose:</strong></p>
+<ul>
+<li>Handle the layered loading states, including pre-loading, edge buffer and
+   re-usability pooling</li>
+<li>React to model changes when they are relevant the viewport</li>
+<li>Keep a projection of the "visible" part of the model:<ul>
+<li>As a 2D Cartesian plan <em>and</em> As a parent/children/sibling tree</li>
+</ul>
+</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              40/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>State trackers: StateTracker::ModelItem (2/2)</h1></header>
+            
+            
+            <section><p><strong>States:</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NEW</td>
+<td>During creation, not part of the tree yet</td>
+</tr>
+<tr>
+<td>BUFFER</td>
+<td>Not in the viewport, but close</td>
+</tr>
+<tr>
+<td>REMOVED</td>
+<td>Currently in a removal transaction</td>
+</tr>
+<tr>
+<td>REACHABLE</td>
+<td>The [grand]parent of visible indexes</td>
+</tr>
+<tr>
+<td>VISIBLE</td>
+<td>The element is visible on screen</td>
+</tr>
+<tr>
+<td>ERROR</td>
+<td>Something went wrong</td>
+</tr>
+<tr>
+<td>DANGLING</td>
+<td>Being destroyed</td>
+</tr>
+<tr>
+<td>MOVING</td>
+<td>Currently undergoing a move operation</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Actions:</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POPULATE</td>
+<td>Fetch the model content and fill the view</td>
+</tr>
+<tr>
+<td>DISABLE</td>
+<td>Disconnect the model tracking</td>
+</tr>
+<tr>
+<td>ENABLE</td>
+<td>Connect the pending model</td>
+</tr>
+<tr>
+<td>RESET</td>
+<td>Remove the delegates but keep the trackers</td>
+</tr>
+<tr>
+<td>FREE</td>
+<td>Free the whole tracking tree</td>
+</tr>
+<tr>
+<td>MOVE</td>
+<td>Try to fix the viewport with content</td>
+</tr>
+<tr>
+<td>TRIM</td>
+<td>Remove the elements until the edge is free</td>
+</tr>
+</tbody>
+</table></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              41/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>State trackers: StateTracker::ViewItem (1/2)</h1></header>
+            
+            
+            <section><p><strong>Purpose:</strong></p>
+<ul>
+<li>Store transient indices during rowsMoved</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              42/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>State trackers: StateTracker::ViewItem (2/2)</h1></header>
+            
+            
+            <section><p><strong>States:</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POOLING</td>
+<td>Being currently removed from view</td>
+</tr>
+<tr>
+<td>POOLED</td>
+<td>Not currently in use, either new or waiting for re-use</td>
+</tr>
+<tr>
+<td>BUFFER</td>
+<td>Not currently on screen, pre-loaded for performance</td>
+</tr>
+<tr>
+<td>ACTIVE</td>
+<td>Visible</td>
+</tr>
+<tr>
+<td>FAILED</td>
+<td>Loading the item was attempted, but failed</td>
+</tr>
+<tr>
+<td>DANGLING</td>
+<td>Pending deletion, invalid pointers</td>
+</tr>
+<tr>
+<td>ERROR</td>
+<td>Something went wrong</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Actions:</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ATTACH</td>
+<td>Activate the element (do not sync it)</td>
+</tr>
+<tr>
+<td>ENTER_BUFFER</td>
+<td>Sync all roles</td>
+</tr>
+<tr>
+<td>ENTER_VIEW</td>
+<td>NOP (todo)</td>
+</tr>
+<tr>
+<td>UPDATE</td>
+<td>Reload the roles</td>
+</tr>
+<tr>
+<td>MOVE</td>
+<td>Move to a new position</td>
+</tr>
+<tr>
+<td>LEAVE_BUFFER</td>
+<td>Stop keeping track of data changes</td>
+</tr>
+<tr>
+<td>DETACH</td>
+<td>Delete</td>
+</tr>
+</tbody>
+</table></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              43/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide has_code">
+          <div class="inner">
+            
+            <header><h1>State trackers: StateTracker::Context</h1></header>
+            
+            
+            <section><p><strong>Purpose:</strong></p>
+<ul>
+<li>Synchronize the QQmlContext (both way) and the different <code>ContextAdapter</code>s</li>
+</ul>
+<p><strong>Roles:</strong></p>
+<div class="highlight"><pre><span></span><span class="lineno"> 1 </span><span class="k">enum</span> <span class="nl">Flags</span> <span class="p">:</span> <span class="kt">int</span> <span class="p">{</span>
+<span class="lineno"> 2 </span>    <span class="n">UNUSED</span>      <span class="o">=</span> <span class="mh">0x0</span> <span class="o">&lt;&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="cm">/*!&lt; This property was never used          */</span>
+<span class="lineno"> 3 </span>    <span class="n">READ</span>        <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="cm">/*!&lt; If data() was ever called             */</span>
+<span class="lineno"> 4 </span>    <span class="n">HAS_DATA</span>    <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">,</span> <span class="cm">/*!&lt; When the QVariant is valid            */</span>
+<span class="lineno"> 5 </span>    <span class="n">TRIED_WRITE</span> <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">,</span> <span class="cm">/*!&lt; When setData returns false            */</span>
+<span class="lineno"> 6 </span>    <span class="n">HAS_WRITTEN</span> <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">3</span><span class="p">,</span> <span class="cm">/*!&lt; When setData returns true             */</span>
+<span class="lineno"> 7 </span>    <span class="n">HAS_CHANGED</span> <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">,</span> <span class="cm">/*!&lt; When the value was queried many times */</span>
+<span class="lineno"> 8 </span>    <span class="n">HAS_SUBSET</span>  <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">5</span><span class="p">,</span> <span class="cm">/*!&lt; When dataChanged has a role list      */</span>
+<span class="lineno"> 9 </span>    <span class="n">HAS_GLOBAL</span>  <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">6</span><span class="p">,</span> <span class="cm">/*!&lt; When dataChanged has no role          */</span>
+<span class="lineno">10 </span>    <span class="n">IS_ROLE</span>     <span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">7</span><span class="p">,</span> <span class="cm">/*!&lt; When the MetaProperty map to a model role */</span>
+<span class="lineno">11 </span><span class="p">};</span>
+</pre></div>
+
+<p><strong>Actions:</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              44/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>State trackers: StateTracker::Geometry (1/2)</h1></header>
+            
+            
+            <section><p><strong>Purpose:</strong></p>
+<ul>
+<li>Make sure the rectangle occupied by this QModelIndex is kept in sync</li>
+<li>Manage the size</li>
+<li>Manage the position</li>
+<li>Manage the decorations around the item</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              45/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>State trackers: StateTracker::Geometry (2/2)</h1></header>
+            
+            
+            <section><p><strong>States:</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>INIT</td>
+<td>The value has not been computed</td>
+</tr>
+<tr>
+<td>SIZE</td>
+<td>The size had been computed</td>
+</tr>
+<tr>
+<td>POSITION</td>
+<td>The position has been computed</td>
+</tr>
+<tr>
+<td>PENDING</td>
+<td>Has all information, but not assembled</td>
+</tr>
+<tr>
+<td>VALID</td>
+<td>The geometry has been computed</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Actions:</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MOVE</td>
+<td>When moved</td>
+</tr>
+<tr>
+<td>RESIZE</td>
+<td>When the content size changes</td>
+</tr>
+<tr>
+<td>PLACE</td>
+<td>When setting the position</td>
+</tr>
+<tr>
+<td>RESET</td>
+<td>The delegate, layout changes, or pooled</td>
+</tr>
+<tr>
+<td>MODIFY</td>
+<td>When the QModelIndex role changes</td>
+</tr>
+<tr>
+<td>DECORATE</td>
+<td>When the decoration size changes</td>
+</tr>
+<tr>
+<td>VIEW</td>
+<td>When the geometry is accessed</td>
+</tr>
+</tbody>
+</table></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              46/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>State trackers: StateTracker::Proximity</h1></header>
+            
+            
+            <section><p><strong>Purpose:</strong></p>
+<ul>
+<li>Track if the next (on the Cardinal and tree projections) elements are loaded</li>
+<li>Prevent holes with missing elements from being created</li>
+</ul>
+<p><strong>States:</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UNKNOWN</td>
+<td>The information is not availablr</td>
+</tr>
+<tr>
+<td>LOADED</td>
+<td>The edges are valid</td>
+</tr>
+<tr>
+<td>MOVED</td>
+<td>It was valid, but some elements moved</td>
+</tr>
+<tr>
+<td>UNLOADED</td>
+<td>It is known that some edges are not loaded</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Actions:</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              47/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies</h1></header>
+            
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              48/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Context management</h1></header>
+            
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              49/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Context management (1/5)</h1></header>
+            
+            
+            <section><ul>
+<li>Model provide roles</li>
+<li>Calling setPropery on each delegate instance context doesn't scale</li>
+<li>QtQuick has some internal tricks to optimize this. They are using private
+  APIs so I had to come up with my own.</li>
+<li>QtQuick views also set some more properties such as <code>rowCount</code> and <code>index</code><ul>
+<li>To make it possible to implement views using the public API, such
+  extensions need to be user definable</li>
+<li>Some properties are static, some read-only and some read/write/notify</li>
+</ul>
+</li>
+<li>The model give <code>QVariant</code>s, QML consume <code>QJSValue</code>s</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              50/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Context management (2/5)</h1></header>
+            
+            
+            <section><ul>
+<li>Gather all the context extensions<ul>
+<li>The model <code>roleNames</code> set is implemented as an extension</li>
+</ul>
+</li>
+<li>Build a large vTable like what <code>automoc</code> does</li>
+<li>Build a new large <code>QMetaType</code> using <code>QMetaObjectBuilder</code></li>
+<li>Create a property map to convert roles ID to property ID</li>
+<li>Create an introspection map to gather statistics on what's used</li>
+<li>Set the <code>contextObject</code> of the <code>QQmlContext</code></li>
+<li>Keep a cache of the QJsValues using the property ID as key for fast access<ul>
+<li>(Future iteration) use a cache the size of the used property count, not
+  the total property count, it wastes memory.</li>
+</ul>
+</li>
+<li>(Future iteration) Once the used subset of properties used by QML is known</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              51/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Context management (3/5)</h1></header>
+            
+            
+            <section><pre><code>  .-- [QObject property ID]
+  |    .--- [Ext ID map]                             .--[RoleID map]
+  |    |   .--- [Usage flags]                        |
+  |    |   |                                         |    [ Cache ]
+ \/   \/  \/ [MetaObject vTable]                     \/       \/
+[0 ] [0] [0] |----------------|------------------|        |  NULL |
+[1 ] [0] [0] | 1  | &lt;--.      |                  |        |  NULL |
+[2 ] [0] [1] | 2  |    |      |      QObject     |        |  "Hi" |
+[3 ] [0] [0] | 3  | Notify ID |     Internals    |        | NULL  |
+[4 ] [0] [0] | 4  |           |                  |        | NULL  |
+[5 ] [ ] [1] | 5  |           |------------------| |42  | |  true |
+[6 ] [1] [3] | 6  |           |                  | |1337| |"elite"|
+[7 ] [1] [0] | 7  |           | Role properties  | |0   | |  NULL |
+[8 ] [1] [0] | 8  | QObject   |                  | |333 | |  NULL |
+[9 ] [ ] [0] | 9  |           |------------------|        |  NULL |
+[10] [2] [0] | 10 | Internal  | Default context  |        |  NULL |
+[11] [2] [0] | 11 |           | extension        |        |  NULL |
+[12] [ ] [0] | 12 | Property  |------------------|        |  NULL |
+[13] [3] [1] | 13 |           | View defined     |        |  123  |
+[14] [3] [0] | 14 |  vTable   | context extension|        |  NULL |
+[15] [3] [0] | 15 |           |         1        |        |  NULL |
+[16] [ ] [0] | 16 |           |------------------|        |  NULL |
+[17] [4] [0] | 17 |           | View defined     |        |  NULL |
+[18] [4] [0] | 18 |           | context extension|        |  NULL |
+[19] [4] [0] | 19 |           |        2         |        |  NULL |
+[20] [ ] [0] | 20 |           |------------------|        |  NULL |
+[21] [5] [0] | 21 |           |       ...        |        |  NULL |
+[22] [ ] [0] |----------------|------------------|        |  NULL |
+
+|_______________________ Global __________________________|   /\
+                                           [Per QModelIndex]--*
+</code></pre></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              52/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Context management (4/5)</h1></header>
+            
+            
+            <section><p>Read:</p>
+<ul>
+<li>A QQuickItem query a property</li>
+<li>The QObject::qt_metacall get the first <code>id</code></li>
+<li>Check the cache and returns the value if it exists</li>
+<li>It uses the extension map to get the extension ID</li>
+<li>It uses the extension offset to get the relative property ID</li>
+<li>It calls the extension with the relative ID</li>
+<li>Update the cache and go back to step 3</li>
+</ul>
+<p>Write:</p>
+<ul>
+<li>Same, but calls a different extension method</li>
+</ul>
+<p>Notify:</p>
+<ul>
+<li>Convert the relative ID to the absolute one</li>
+<li>Use the metacall using the notify ID map</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              53/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Context management (5/5)</h1></header>
+            
+            
+            <section><p>Pros:</p>
+<ul>
+<li>Every map but the roleID-&gt;PropId is a direct memory access away, no lookup</li>
+<li>The flags allows to eventually merge the branch that optimize memory usage</li>
+<li>The caching prevents most calls to <code>QAbstractItemModel::data()</code></li>
+</ul>
+<p>Cons:</p>
+<ul>
+<li>QAbstractItemModel::roleNames needs to be static</li>
+<li>It creates some QMetaType noise in GammaRay</li>
+<li>The context extensions needs to be added before the first delegate is created</li>
+<li>The extensions work using relative integer IDs instead of property names.<ul>
+<li>Maybe we could go meta and use Q_PROPERTY</li>
+</ul>
+</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              54/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Pools</h1></header>
+            
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              55/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Pools</h1></header>
+            
+            
+            <section><ul>
+<li>Updating a delegate is much faster than creating a new one</li>
+<li>The StateTracker::ModelItem can "retire" out of view elements into a pools<ul>
+<li>Right now the code to re-use them has been deleted because even with "cpp"
+  ownership, it still caused crashes and I didn't want to lose time fixing
+  this.</li>
+</ul>
+</li>
+<li>There is also a "nearly visible" element buffer like in QtQuick.ListView</li>
+<li>It eventually needs many pools if multi-delegate support is added</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              56/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Size (and position) hints</h1></header>
+            
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              57/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Size (and position) hints</h1></header>
+            
+            
+            <section><p>Constraints (1/2):</p>
+<ul>
+<li>Knowing where a QModelIndex is displayed and its size ahead of time is not
+  possible if the size is determined after the delegate instance
+  <code>Component.onCompleted</code> is emited.</li>
+<li>Knowing the position and size is required to implement a deterministic
+  scrollbar.</li>
+<li>Some QModelIndex may result in failed or no delegate instance</li>
+<li>Some QModelIndex may produce different sizes</li>
+<li>When using trees, the position is based on a 2D "table" projection of the
+  tree</li>
+<li>The viewport size and ratio can change and affect the content</li>
+<li>Some metadata necessary to compute the size are constant or have known update
+  life cycle but are expensive to acquire.<ul>
+<li>Some other are cheaper to recompute than to cache</li>
+</ul>
+</li>
+<li>Some information necessary to get the size may exist at different time</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              58/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Size (and position) hints</h1></header>
+            
+            
+            <section><p>Constraints (2/2):</p>
+<ul>
+<li>Using different adapters and view capabilities requires different metadata
+  at different time</li>
+<li>Sometime, a QModelIndex "position" in the model has no relation with its
+  position in the view</li>
+<li>Some QModelIndex, such as ones used in QTreeView, have widget decorations
+  that are not part of the delegate and also have dynamic sizes</li>
+<li>Some axis can have different size constraint (fixed columns vs. varying
+  height)</li>
+<li>Some information can change when "nearby" QModelIndex change</li>
+<li>Some model have to be used by multiple views<ul>
+<li>Some other are tied</li>
+</ul>
+</li>
+<li>The programmer and designer need to be able to implement those hints when
+  necessary<ul>
+<li>They need to be deterministic and device agnostic)</li>
+</ul>
+</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              59/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Size (and position) hints</h1></header>
+            
+            
+            <section><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AOT</td>
+<td>Load everything ahead of time, doesn't scale but very reliable</td>
+</tr>
+<tr>
+<td>JIT</td>
+<td>Do not try to compute the total size, scrollbars wont work</td>
+</tr>
+<tr>
+<td>UNIFORM</td>
+<td>Assume all elements have the same size, scales well when true</td>
+</tr>
+<tr>
+<td>PROXY</td>
+<td>Use a QSizeHintProxyModel, require work by all developers</td>
+</tr>
+<tr>
+<td>ROLE</td>
+<td>Use one of the QAbstractItemModel role as size</td>
+</tr>
+<tr>
+<td>DELEGATE</td>
+<td>Assume the view re-implemented ::sizeHint is correct</td>
+</tr>
+<tr>
+<td>STATIC</td>
+<td>Have a C++ function that return a size per column</td>
+</tr>
+</tbody>
+</table></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              60/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Size (and position) hints</h1></header>
+            
+            
+            <section><p><strong>Name:</strong> Ahead of time (AOT)</p>
+<p><strong>Automatic:</strong> yes</p>
+<p><strong>Description:</strong> Load every single delegates to make sure all metadata exists</p>
+<p><strong>Usecase:</strong></p>
+<ul>
+<li>When there is a scrollbar and no other way to get the metadata</li>
+</ul>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>It is simple and always works</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>Horrible thing to do</li>
+<li>Doesn't scale past ~40 elements on low end mobile/embedded</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              61/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Size (and position) hints</h1></header>
+            
+            
+            <section><p><strong>Name:</strong> Just In Time (JIT)</p>
+<p><strong>Automatic:</strong> yes (and default strategy)</p>
+<p><strong>Description:</strong> Load each element after the other until the view is filled</p>
+<p><strong>Usecase:</strong></p>
+<ul>
+<li>When there is no scrollbar</li>
+</ul>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>Doesn't need to know the size and position before loading</li>
+<li>Can "scroll" to random QModelIndex by flushing the loaded elements</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>Doesn't support a scrollbar</li>
+<li>Doesn't support contentHeight, contentY, etc</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              62/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Size (and position) hints</h1></header>
+            
+            
+            <section><p><strong>Name:</strong> Uniform (semi TODO)</p>
+<p><strong>Automatic:</strong> yes</p>
+<p><strong>Description:</strong> Load one element, get the size and assume everything else
+will have the same size.</p>
+<p><strong>Usecase:</strong></p>
+<ul>
+<li>Normal models</li>
+<li>Large models</li>
+<li>Mostly collapsed TreeViews</li>
+</ul>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>Every easy to compute the position and size of an element</li>
+<li>The scrollbar/contentHeight/contentY "just work"</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>Require each QModelIndex with non-collapsed children to be "registered" in
+  an internal structure (just like <code>QtWidgets.QTreeView</code>)</li>
+<li>Doesn't support delgates with different size</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              63/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Size (and position) hints</h1></header>
+            
+            
+            <section><p><strong>Name:</strong> ROLE (TODO)</p>
+<p><strong>Automatic:</strong> yes</p>
+<p><strong>Description:</strong> Use a defined model role (default: Qt::SizeHintRole) to get
+the size</p>
+<p><strong>Usecase:</strong></p>
+<ul>
+<li>Models which need scrollbars</li>
+</ul>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>The logic is done is C++</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>It ties the model with the view and that's evil (can be implemented as a
+  proxy too, see the last strategy)</li>
+<li>Still need to query everything to get he full picture</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              64/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Size (and position) hints</h1></header>
+            
+            
+            <section><p><strong>Name:</strong> Delegate (TODO)</p>
+<p><strong>Automatic:</strong> no</p>
+<p><strong>Description:</strong> Add a special expression or callback property to the
+ delegate and use that after loading the first one.</p>
+<p><strong>Usecase:</strong></p>
+<ul>
+<li>When no C++ is involved</li>
+</ul>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>Quick to implement in QML+JavaScript</li>
+<li>Simple given the delegate has by definition access to the necessary font
+  metrics</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>It's a hack</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              65/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Size (and position) hints</h1></header>
+            
+            
+            <section><p><strong>Name:</strong> Static (Used in <code>QtQuick.TableView</code> as <code>columnWidthProvider</code>, currently
+ not implemented on my side)</p>
+<p><strong>Automatic:</strong> no</p>
+<p><strong>Description:</strong> Add a function either on the C++ model or just a random JS
+ function to get a value and use it.</p>
+<p><strong>Usecase:</strong></p>
+<ul>
+<li>Be compatible with QtQuick.TableView</li>
+</ul>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>None, really, it doesn't even support the height</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>It doesn't even support the height</li>
+<li>There is better strategies described above and below</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              66/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Size (and position) hints</h1></header>
+            
+            
+            <section><p><strong>Name:</strong> Proxy variant 1 (implemented by this framework)</p>
+<p><strong>Automatic:</strong> no</p>
+<p><strong>Description:</strong> Create a special proxy model in QML that has access to the
+ framework internal APIs so it can generate the size hints and be used
+ internally</p>
+<p><strong>Usecase:</strong></p>
+<ul>
+<li>It's a clean way to emulate the old QtWidgets ::sizeHint() method of the
+  delegate</li>
+</ul>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>It seems rather a good compromise</li>
+<li>Support all view features</li>
+<li>Re-use the context optimizations introduced earlier</li>
+<li>Uses JavaScript expressions and feel very natural in QML</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>Requires access to private APIs</li>
+<li>Proxy models are not the most efficient models</li>
+<li>Either need to upstream my context optimizations or refactor the QtQuick own
+  context optimizations to be mutualized between the proxy and the view.</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              67/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Demonstration</h1></header>
+            
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              68/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide has_code">
+          <div class="inner">
+            
+            
+            <section><div class="highlight"><pre><span></span><span class="lineno"> 1 </span><span class="nx">model</span><span class="o">:</span> <span class="nx">KQuickView</span><span class="p">.</span><span class="nx">SizeHintProxyModel</span> <span class="p">{</span>
+<span class="lineno"> 2 </span>    <span class="nx">id</span><span class="o">:</span> <span class="nx">proxyModel</span>
+<span class="lineno"> 3 </span>
+<span class="lineno"> 4 </span>    <span class="cm">/*invalidationRoles: [</span>
+<span class="lineno"> 5 </span><span class="cm">        &quot;object&quot;,</span>
+<span class="lineno"> 6 </span><span class="cm">        &quot;unreadTextMessageCount&quot;,</span>
+<span class="lineno"> 7 </span><span class="cm">        &quot;isRecording&quot;,</span>
+<span class="lineno"> 8 </span><span class="cm">        &quot;hasActiveVideo&quot;,</span>
+<span class="lineno"> 9 </span><span class="cm">    ]*/</span>
+<span class="lineno">10 </span>
+<span class="lineno">11 </span>    <span class="nx">constants</span><span class="o">:</span> <span class="p">({</span>
+<span class="lineno">12 </span>        <span class="nx">fmh</span><span class="o">:</span> <span class="nx">fontMetrics</span><span class="p">.</span><span class="nx">height</span><span class="p">,</span>
+<span class="lineno">13 </span>        <span class="nx">fmh2</span><span class="o">:</span> <span class="nx">fontMetrics</span><span class="p">.</span><span class="nx">height</span><span class="p">,</span>
+<span class="lineno">14 </span>    <span class="p">})</span>
+<span class="lineno">15 </span>
+<span class="lineno">16 </span>    <span class="kd">function</span> <span class="nx">getRowCount</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
+<span class="lineno">17 </span>        <span class="kd">var</span> <span class="nx">activeCM</span> <span class="o">=</span> <span class="nx">obj</span> <span class="o">?</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">activeContactMethod</span> <span class="o">:</span> <span class="kc">null</span>
+<span class="lineno">18 </span>
+<span class="lineno">19 </span>        <span class="k">return</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">((</span><span class="nx">obj</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">obj</span><span class="p">.</span><span class="nx">hasActiveCall</span>
+<span class="lineno">20 </span>            <span class="o">||</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">unreadTextMessageCount</span> <span class="o">&gt;</span> <span class="mi">0</span>
+<span class="lineno">21 </span>            <span class="o">||</span> <span class="p">(</span><span class="nx">activeCM</span> <span class="o">&amp;&amp;</span> <span class="nx">activeCM</span><span class="p">.</span><span class="nx">isRecording</span><span class="p">)</span>
+<span class="lineno">22 </span>            <span class="o">||</span> <span class="p">(</span><span class="nx">activeCM</span> <span class="o">&amp;&amp;</span> <span class="nx">activeCM</span><span class="p">.</span><span class="nx">hasActiveVideo</span><span class="p">)</span>
+<span class="lineno">23 </span>        <span class="p">)</span> <span class="o">?</span> <span class="mi">1</span> <span class="o">:</span> <span class="mi">0</span><span class="p">)</span>
+<span class="lineno">24 </span>    <span class="p">}</span>
+<span class="lineno">25 </span>
+<span class="lineno">26 </span>    <span class="nx">widthHint</span><span class="o">:</span> <span class="nx">recentView</span><span class="p">.</span><span class="nx">width</span>
+<span class="lineno">27 </span>    <span class="nx">heightHint</span><span class="o">:</span> <span class="p">(</span><span class="nx">proxyModel</span><span class="p">.</span><span class="nx">getRowCount</span><span class="p">(</span><span class="nx">object</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="nx">fmh</span> <span class="o">+</span> <span class="mi">13</span>
+<span class="lineno">28 </span>
+<span class="lineno">29 </span>    <span class="nx">sourceModel</span><span class="o">:</span> <span class="nx">PeersTimelineModel</span>
+<span class="lineno">30 </span><span class="p">}</span>
+</pre></div>
+</section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              69/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Size (and position) hints</h1></header>
+            
+            
+            <section><p><strong>Name:</strong> Proxy variant 2</p>
+<p><strong>Automatic:</strong> no</p>
+<p><strong>Description:</strong> A proxy model that just sets Qt::SizeHintRole using in C++</p>
+<p><strong>Usecase:</strong></p>
+<ul>
+<li>It's the "role" strategy but without coupling the "real" model with the view</li>
+</ul>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>It's the "role" strategy but without coupling the "real" model with the view</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>Same as the "role" strategy</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              70/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Size (and position) hints</h1></header>
+            
+            
+            <section><p><strong>Name:</strong> Proxy variant 3 (see link below)</p>
+<p><strong>Automatic:</strong> no</p>
+<p><strong>Description:</strong> A proxy model implemented in QML based on the design of the
+link below</p>
+<p><strong>Usecase:</strong></p>
+<ul>
+<li>Same as above</li>
+</ul>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>No C++ required</li>
+<li>Can use declarative objects to build rules that can then be used from C++
+  without round trips in QML</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>It's more complex to use than variant one</li>
+<li>It feels a bit less native than "normal" QML expressions</li>
+<li>If it uses RegEx, then it's error prone, slow and limited to string roles</li>
+</ul>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>https://github.com/oKcerG/SortFilterProxyModel</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              71/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Size (and position) hints</h1></header>
+            
+            
+            <section><p><strong>Name:</strong> Proxy variant 4</p>
+<p><strong>Automatic:</strong> no</p>
+<p><strong>Description:</strong> Create an implementation that supports variant 1, 2 and 3 and
+ let the developer decides what fit their use case best</p>
+<p><strong>Usecase:</strong></p>
+<ul>
+<li>Same as above</li>
+</ul>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>More choice</li>
+<li>Maybe a bit more future proof than putting all eggs in the same basket</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>It's more complex to implement</li>
+<li>Either need to upstream my context optimizations or refactor the QtQuick own
+  context optimizations to be mutualized between the proxy and the view.</li>
+</ul>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>https://github.com/oKcerG/SortFilterProxyModel</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              72/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Other</h1></header>
+            
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              73/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Other</h1></header>
+            
+            
+            <section><p>Here's a slighly outdated version of the planned/possible optimizations. As
+mentionned in the "status" section below, there is a lot of half-implemented
+work in progress optimizations that are not planned for the first optimization
+iteration but have some hooks and code paths already in place with
+<code>Q_ASSERT(false); //TODO</code> and <code>#if 0</code>.</p>
+<ul>
+<li>[X] Fully decouple the QModelIndex traversal code vs. the GUI elements</li>
+<li>[X] Do not create QQuickItem for invisible elements</li>
+<li>[ ] "really" delete discarded elements without using QtQuick2 garbage collector</li>
+<li>[ ] Have a loaded elements buffer around the visible ones</li>
+<li>[ ] A a recyclable cache of discarded elements<ul>
+<li>[ ] Allow global recycling</li>
+<li>[ ] Allow recycling per tree depth level only</li>
+<li>[ ] Support different delegates per depth level without a
+     <code>QtQuick2.Loader</code> with their own cache pool.</li>
+</ul>
+</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              74/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Other</h1></header>
+            
+            
+            <section><ul>
+<li>[X] Lazy load the internal tree representation<ul>
+<li>[X] Stop parsing after the elements stop being visible</li>
+<li>[ ] Only load the depth chain, not its content (unless visible)</li>
+<li>[ ] Free memory of invisible QPersistentModelIndex tracker</li>
+<li>[ ] Load many TreeTraversalItems at once to mitigate the overhead<ul>
+<li>[ ] Have a state machine for TreeTraversalItemsRange to mutualize range
+    operations and move the code away from
+    TreeTraversalItems::m_fStateMachine</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>[X] Have an optimized QML context manager (requires Qt private APIs)<ul>
+<li>[X] Do not refresh the widget when unused roles are dataChanged</li>
+<li>[X] Only set the used roles in the context instead of all of them</li>
+<li>[X] Do not call QAbstractItemModel::data when it hasn't changed</li>
+</ul>
+</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              75/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Other</h1></header>
+            
+            
+            <section><ul>
+<li>[X] Support the <code>QSizeHintsProxyModel</code> (needs a better name) to compute<ul>
+<li>[X] Have a default UniformRowHeight mode to bypass all this
+    the geometry without actually creating QQuickItem just to know it...</li>
+<li>[ ] Use the sizehint information to be able to load from a random QPoint
+        without loading from a model edge.</li>
+<li>[ ] Allow to discard</li>
+</ul>
+</li>
+<li>[ ] Support TreeView collapsed elements without loading the children.</li>
+<li>[ ] Optimize the flickable to "disable itself" when <code>interactive</code> is false</li>
+<li>[ ] Cache the Cartesian navigation results and use the state machine to
+      discard invalid ones.</li>
+<li>[ ] Batch detaching items instead of looping to prevent the feedback loop from
+      being ran for nothing and "your neighbor just changed" being executed for
+      items about to be removed.</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              76/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Other</h1></header>
+            
+            
+            <section><ul>
+<li>[ ] Batch slotRowsInserted to share the linked list insertion and siblings
+      "move yourself, you have a new neighbor" events</li>
+<li>[ ] Support conditional delegates based on a QQmlScriptString instead of
+      using conditional QtQuick2.Loader to keep pools of reusable delegates</li>
+<li>[ ] Cache the Cartesian navigation results and use the state machine to
+      discard invalid ones.</li>
+<li>[ ] Allow to load from the bottom up and from the right</li>
+<li>[ ] Avoid loading the children of "tail"/"leaf" items when in raster mode,
+      its wasted memory</li>
+<li>[ ] Add an option to compute the totalsize (ei: for the scrollbar) in a
+      thread if the model is reentrant</li>
+<li>[ ] Support "load more"</li>
+<li>[ ] Allow the state machine code to be inlined (stop using vtables) if it
+      ever reaches the top 10 bottleneck (I doubt it ever will)</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              77/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Optimizations strategies: Other</h1></header>
+            
+            
+            <section><ul>
+<li>[ ] Support Qt::ItemNeverHasChildren Qt::InitialSortOrderRole Qt::SizeHintRole</li>
+<li>[ ] For non-Cartesian models where QRectF is known, implement tiling.</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              78/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Status</h1></header>
+            
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              79/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Status: views</h1></header>
+            
+            
+            <section><ul>
+<li>[ ] Cartesian views<ul>
+<li>[X] ListView with Sections</li>
+<li>[/] TreeView with collapsing</li>
+<li>[/] ComboBox</li>
+<li>[ ] FlameGraph</li>
+<li>[ ] GridView</li>
+<li>[ ] Some Excel charts</li>
+<li>[ ] CalendarView zoom from years single day</li>
+<li>[ ] Timeline(tree)/Gantt</li>
+</ul>
+</li>
+<li>[ ] Radial and 2.5D/3D<ul>
+<li>[ ] HierarchyView</li>
+<li>[ ] RadialListView</li>
+<li>[ ] FileLight</li>
+</ul>
+</li>
+<li>Non item based<ul>
+<li>[ ] Some Excel line graphs</li>
+</ul>
+</li>
+<li>[ ] Flow views<ul>
+<li>[ ] Node graph</li>
+<li>[ ] Pipeline</li>
+<li>[ ] UML style class/database diagrams</li>
+</ul>
+</li>
+<li>Random bad ideas<ul>
+<li>PowerPoint slides using models, because why not</li>
+<li>Some lost souls with too much time might want to attempt HTML rendering
+  on top of the XML model (that would be beyond pointless, but "possible")</li>
+</ul>
+</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              80/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Limitations</h1></header>
+            
+            
+            <section><ul>
+<li>At first I attempted to implement paging and batching to vastly reduce the
+  CPU overhead. It caused the complexity to skyrocket and I deleted it.<ul>
+<li>It is still the "way to go", but only once everything else is <strong>very</strong>
+  mature and unit tested. This should not affect the public API</li>
+</ul>
+</li>
+<li>The "x" axis has been ignored. No tables for now.<ul>
+<li>QtQuick.TableView works fine</li>
+<li>It is designed to be added later, but isn't present right now</li>
+<li>I am 1 month late and I have no use for it right now</li>
+</ul>
+</li>
+<li>The Cartesian projection is assumed to be true in wayyyy too many places,
+  this needs to be cleaned up or it might make some views impossible to
+  implement.</li>
+<li>There is no special APIs to implement more complex animations (yet?) beyond
+  standard QML ones.</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              81/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Not implemented yet</h1></header>
+            
+            
+            <section><ul>
+<li>Better support for smart pointers</li>
+<li>Raster delegate</li>
+<li>Any views or features I have no use for</li>
+<li>All the micro optimizations that go beyond the performance threshold I need
+  to ship products using these views.</li>
+<li>Delegate recycling has been gutted for now until I have time to test it
+  properly</li>
+<li>Multiple delegate per model based on conditions</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              82/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Work in progress</h1></header>
+            
+            
+            <section><ul>
+<li>Some of the state tracker have more Q_ASSERT and qDebug than lines of "real"
+  code</li>
+<li>With the optimizations turned on, there is rendering issues</li>
+<li>There is tests but not full coverage</li>
+<li>Limited real world testing beside the chat app and the integration tests</li>
+<li>A lot of what I said "has code" but has not been tested because I am not there
+  yet (and don't need it in the near term).</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              83/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Time table</h1></header>
+            
+            
+            <section><ul>
+<li>Oct-Nov 2017: First version which load every single QQuickItem ahead of time
+  and is updated for every changes (milestone 1, released, shipped)</li>
+<li>Sep 2018: Complete the user API (milestone 2, released)</li>
+<li>Oct-Nov 2018: Implement enough optimizations to ship Ring-KDE 3.1 on mobile
+  (milestone 3, stabilizing, in-progress)</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              84/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Demo #1: LibRingQt / Ring-KDE / Plasma Mobile dialer</h1></header>
+            
+            
+            <section><p>A modular phone and secure communication stack.</p></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              85/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source: README.md -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            <header><h1>Demo #2: A model based node editor</h1></header>
+            
+            
+            <section><ul>
+<li>Uses an older QGraphicsView based version.</li>
+<li>It is one of the ancestor of this framework.</li>
+<li>Should be rather easy to port to the newer stack once the Cartesian
+  limitations mentioned before get addressed.</li>
+</ul></section>
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="source">
+              Source: <a href="README.md">README.md</a>
+            </aside>
+            
+            <aside class="page_number">
+              86/86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+      <!-- slide source:  -->
+      <div class="slide-wrapper">
+        <div class="slide">
+          <div class="inner">
+            
+            
+          </div>
+          <div class="presenter_notes">
+            <header><h1>Presenter Notes</h1></header>
+            <section>
+            
+            </section>
+          </div>
+          <footer>
+            
+            <aside class="page_number">
+              /86
+            </aside>
+          </footer>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div id="toc" class="sidebar hidden">
+    <h2>Table of Contents</h2>
+    <table>
+      <caption>Table of Contents</caption>
+      
+      <tr id="toc-row-1">
+        <th><a href="#slide1">A QtQuick framework for visualizing models</a></th>
+        <td><a href="#slide1">1</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-2">
+        <th><a href="#slide2">Opinion #1</a></th>
+        <td><a href="#slide2">2</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-3">
+        <th><a href="#slide3">Why?</a></th>
+        <td><a href="#slide3">3</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-4">
+        <th><a href="#slide4">Historical notes</a></th>
+        <td><a href="#slide4">4</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-5">
+        <th><a href="#slide5">Opinion #2</a></th>
+        <td><a href="#slide5">5</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-6">
+        <th><a href="#slide6">Why: Limitations of the current QtQuick.Views architecture</a></th>
+        <td><a href="#slide6">6</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-7">
+        <th><a href="#slide7">Opinion #3</a></th>
+        <td><a href="#slide7">7</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-8">
+        <th><a href="#slide8">What is this all about?</a></th>
+        <td><a href="#slide8">8</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-9">
+        <th><a href="#slide9">Table of content</a></th>
+        <td><a href="#slide9">9</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-10">
+        <th><a href="#slide10">Functional goals</a></th>
+        <td><a href="#slide10">10</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-11">
+        <th><a href="#slide11">Functional goals</a></th>
+        <td><a href="#slide11">11</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-12">
+        <th><a href="#slide12">Non functional goals</a></th>
+        <td><a href="#slide12">12</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-13">
+        <th><a href="#slide13">Code pattern goals</a></th>
+        <td><a href="#slide13">13</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-14">
+        <th><a href="#slide14">Design process</a></th>
+        <td><a href="#slide14">14</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-15">
+        <th><a href="#slide15">Rationals: Why state machines?</a></th>
+        <td><a href="#slide15">15</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-16">
+        <th><a href="#slide16">Where state machine make sense?</a></th>
+        <td><a href="#slide16">16</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-17">
+        <th><a href="#slide17">Where state machine make sense?</a></th>
+        <td><a href="#slide17">17</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-18">
+        <th><a href="#slide18">Why build everything out of LEGO?</a></th>
+        <td><a href="#slide18">18</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-19">
+        <th><a href="#slide19">About speed (Q&amp;A)</a></th>
+        <td><a href="#slide19">19</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-20">
+        <th><a href="#slide20">Why start from scratch instead of using Qt APIs.</a></th>
+        <td><a href="#slide20">20</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-21">
+        <th><a href="#slide21">Design: Architecture</a></th>
+        <td><a href="#slide21">21</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-22">
+        <th><a href="#slide22">Design: Overview of the layers (1/3)</a></th>
+        <td><a href="#slide22">22</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-23">
+        <th><a href="#slide23">Design: Overview of the layers (2/3)</a></th>
+        <td><a href="#slide23">23</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-24">
+        <th><a href="#slide24">Design: Overview of the layers (3/3)</a></th>
+        <td><a href="#slide24">24</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-25">
+        <th><a href="#slide25">Design of the public API</a></th>
+        <td><a href="#slide25">25</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-26">
+        <th><a href="#slide26">Design: Adapters: Overview</a></th>
+        <td><a href="#slide26">26</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-27">
+        <th><a href="#slide27">Design: Adapters: ModelAdapter</a></th>
+        <td><a href="#slide27">27</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-28">
+        <th><a href="#slide28">Design: Adapters: (Abstract)ItemAdapter</a></th>
+        <td><a href="#slide28">28</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-29">
+        <th><a href="#slide29">Design: Adapters: SelectionAdapter</a></th>
+        <td><a href="#slide29">29</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-30">
+        <th><a href="#slide30">Design: Adapters: DecorationAdapter (needs a new name)</a></th>
+        <td><a href="#slide30">30</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-31">
+        <th><a href="#slide31">Design: Adapters: ContextAdapter</a></th>
+        <td><a href="#slide31">31</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-32">
+        <th><a href="#slide32">Design: Adapters: ScrollAdapter</a></th>
+        <td><a href="#slide32">32</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-33">
+        <th><a href="#slide33">Design: ~~Adapters:~~ Viewport</a></th>
+        <td><a href="#slide33">33</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-34">
+        <th><a href="#slide34">Design: ~~Adapters:~~ TreeTraversalReflector</a></th>
+        <td><a href="#slide34">34</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-35">
+        <th><a href="#slide35">Design: ~~Adapters:~~ ViewBase</a></th>
+        <td><a href="#slide35">35</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-36">
+        <th><a href="#slide36">Design: ~~Adapters:~~ SingleModelViewBase</a></th>
+        <td><a href="#slide36">36</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-37">
+        <th><a href="#slide37">Design of the private API</a></th>
+        <td><a href="#slide37">37</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-38">
+        <th><a href="#slide38">State trackers: Overview</a></th>
+        <td><a href="#slide38">38</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-39">
+        <th><a href="#slide39">State trackers: StateTracker::Index</a></th>
+        <td><a href="#slide39">39</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-40">
+        <th><a href="#slide40">State trackers: StateTracker::ModelItem (1/2)</a></th>
+        <td><a href="#slide40">40</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-41">
+        <th><a href="#slide41">State trackers: StateTracker::ModelItem (2/2)</a></th>
+        <td><a href="#slide41">41</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-42">
+        <th><a href="#slide42">State trackers: StateTracker::ViewItem (1/2)</a></th>
+        <td><a href="#slide42">42</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-43">
+        <th><a href="#slide43">State trackers: StateTracker::ViewItem (2/2)</a></th>
+        <td><a href="#slide43">43</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-44">
+        <th><a href="#slide44">State trackers: StateTracker::Context</a></th>
+        <td><a href="#slide44">44</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-45">
+        <th><a href="#slide45">State trackers: StateTracker::Geometry (1/2)</a></th>
+        <td><a href="#slide45">45</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-46">
+        <th><a href="#slide46">State trackers: StateTracker::Geometry (2/2)</a></th>
+        <td><a href="#slide46">46</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-47">
+        <th><a href="#slide47">State trackers: StateTracker::Proximity</a></th>
+        <td><a href="#slide47">47</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-48">
+        <th><a href="#slide48">Optimizations strategies</a></th>
+        <td><a href="#slide48">48</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-49">
+        <th><a href="#slide49">Optimizations strategies: Context management</a></th>
+        <td><a href="#slide49">49</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-50">
+        <th><a href="#slide50">Optimizations strategies: Context management (1/5)</a></th>
+        <td><a href="#slide50">50</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-51">
+        <th><a href="#slide51">Optimizations strategies: Context management (2/5)</a></th>
+        <td><a href="#slide51">51</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-52">
+        <th><a href="#slide52">Optimizations strategies: Context management (3/5)</a></th>
+        <td><a href="#slide52">52</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-53">
+        <th><a href="#slide53">Optimizations strategies: Context management (4/5)</a></th>
+        <td><a href="#slide53">53</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-54">
+        <th><a href="#slide54">Optimizations strategies: Context management (5/5)</a></th>
+        <td><a href="#slide54">54</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-55">
+        <th><a href="#slide55">Optimizations strategies: Pools</a></th>
+        <td><a href="#slide55">55</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-56">
+        <th><a href="#slide56">Optimizations strategies: Pools</a></th>
+        <td><a href="#slide56">56</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-57">
+        <th><a href="#slide57">Optimizations strategies: Size (and position) hints</a></th>
+        <td><a href="#slide57">57</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-58">
+        <th><a href="#slide58">Optimizations strategies: Size (and position) hints</a></th>
+        <td><a href="#slide58">58</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-59">
+        <th><a href="#slide59">Optimizations strategies: Size (and position) hints</a></th>
+        <td><a href="#slide59">59</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-60">
+        <th><a href="#slide60">Optimizations strategies: Size (and position) hints</a></th>
+        <td><a href="#slide60">60</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-61">
+        <th><a href="#slide61">Optimizations strategies: Size (and position) hints</a></th>
+        <td><a href="#slide61">61</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-62">
+        <th><a href="#slide62">Optimizations strategies: Size (and position) hints</a></th>
+        <td><a href="#slide62">62</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-63">
+        <th><a href="#slide63">Optimizations strategies: Size (and position) hints</a></th>
+        <td><a href="#slide63">63</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-64">
+        <th><a href="#slide64">Optimizations strategies: Size (and position) hints</a></th>
+        <td><a href="#slide64">64</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-65">
+        <th><a href="#slide65">Optimizations strategies: Size (and position) hints</a></th>
+        <td><a href="#slide65">65</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-66">
+        <th><a href="#slide66">Optimizations strategies: Size (and position) hints</a></th>
+        <td><a href="#slide66">66</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-67">
+        <th><a href="#slide67">Optimizations strategies: Size (and position) hints</a></th>
+        <td><a href="#slide67">67</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-68">
+        <th><a href="#slide68">Demonstration</a></th>
+        <td><a href="#slide68">68</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-69">
+        <th><a href="#slide69">-</a></th>
+        <td><a href="#slide69">69</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-70">
+        <th><a href="#slide70">Optimizations strategies: Size (and position) hints</a></th>
+        <td><a href="#slide70">70</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-71">
+        <th><a href="#slide71">Optimizations strategies: Size (and position) hints</a></th>
+        <td><a href="#slide71">71</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-72">
+        <th><a href="#slide72">Optimizations strategies: Size (and position) hints</a></th>
+        <td><a href="#slide72">72</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-73">
+        <th><a href="#slide73">Optimizations strategies: Other</a></th>
+        <td><a href="#slide73">73</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-74">
+        <th><a href="#slide74">Optimizations strategies: Other</a></th>
+        <td><a href="#slide74">74</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-75">
+        <th><a href="#slide75">Optimizations strategies: Other</a></th>
+        <td><a href="#slide75">75</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-76">
+        <th><a href="#slide76">Optimizations strategies: Other</a></th>
+        <td><a href="#slide76">76</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-77">
+        <th><a href="#slide77">Optimizations strategies: Other</a></th>
+        <td><a href="#slide77">77</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-78">
+        <th><a href="#slide78">Optimizations strategies: Other</a></th>
+        <td><a href="#slide78">78</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-79">
+        <th><a href="#slide79">Status</a></th>
+        <td><a href="#slide79">79</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-80">
+        <th><a href="#slide80">Status: views</a></th>
+        <td><a href="#slide80">80</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-81">
+        <th><a href="#slide81">Limitations</a></th>
+        <td><a href="#slide81">81</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-82">
+        <th><a href="#slide82">Not implemented yet</a></th>
+        <td><a href="#slide82">82</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-83">
+        <th><a href="#slide83">Work in progress</a></th>
+        <td><a href="#slide83">83</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-84">
+        <th><a href="#slide84">Time table</a></th>
+        <td><a href="#slide84">84</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-85">
+        <th><a href="#slide85">Demo #1: LibRingQt / Ring-KDE / Plasma Mobile dialer</a></th>
+        <td><a href="#slide85">85</a></td>
+      </tr>
+      
+      
+      <tr id="toc-row-86">
+        <th><a href="#slide86">Demo #2: A model based node editor</a></th>
+        <td><a href="#slide86">86</a></td>
+      </tr>
+      
+      
+    </table>
+  </div>
+  
+  <div id="help" class="sidebar hidden">
+    <h2>Help</h2>
+    <table>
+      <caption>Help</caption>
+      <tr>
+        <th>Table of Contents</th>
+        <td>t</td>
+      </tr>
+      <tr>
+        <th>Exposé</th>
+        <td>ESC</td>
+      </tr>
+      <tr>
+        <th>Full screen slides</th>
+        <td>e</td>
+      </tr>
+      <tr>
+        <th>Presenter View</th>
+        <td>p</td>
+      </tr>
+      <tr>
+        <th>Source Files</th>
+        <td>s</td>
+      </tr>
+      <tr>
+        <th>Slide Numbers</th>
+        <td>n</td>
+      </tr>
+      <tr>
+        <th>Toggle screen blanking</th>
+        <td>b</td>
+      </tr>
+      <tr>
+        <th>Show/hide slide context</th>
+        <td>c</td>
+      </tr>
+      <tr>
+        <th>Notes</th>
+        <td>2</td>
+      </tr>
+      <tr>
+        <th>Help</th>
+        <td>h</td>
+      </tr>
+    </table>
+  </div>
+  <script>main()</script>
+</body>
+</html>
