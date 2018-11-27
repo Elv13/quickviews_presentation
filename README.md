@@ -34,7 +34,7 @@ profit the Web stack, because that's what they will switch to.
 ---
 
 Why?
-===
+====
 
 ---
 
@@ -541,12 +541,20 @@ Design of the private API
 State trackers: Overview
 ======
 
- * Model topology (the rowsMoved transaction and the like)
+**Per QModelIndex:**
+
+ * Model item (the rowsMoved transaction and the like)
  * Model index metadata (track which part of the model is "tracked")
  * View item (the delegate instance life cycle)
  * Context (the ever changing values of the roles)
  * Geometry (the relative and absolute position in the view)
- * proximity (track if the nearby elements are fully loaded)
+ * Proximity (track if the nearby elements are fully loaded)
+
+**Per View:**
+
+ * Model (allow to cleanup and replace the QAbstractItemModel)
+ * ViewEdge (track the visible and buffer area edges)
+ * Viewport (allow to cleanup and replace the QAbstractItemModel)
 
 ---
 
@@ -601,7 +609,6 @@ State trackers: StateTracker::ModelItem (2/2)
 | ERROR     | Something went wrong                                 |
 | DANGLING  | Being destroyed                                      |
 | MOVING    | Currently undergoing a move operation                |
-
 
 **Actions:**
 
@@ -742,14 +749,106 @@ State trackers: StateTracker::Proximity
 | MOVED     | It was valid, but some elements moved      |
 | UNLOADED  | It is known that some edges are not loaded |
 
-
 **Actions:**
 
 | | |
 |----------|--------------------------------------------|
 
+---
+
+State trackers: ModelChange
+======
+
+**Purpose:**
+
+ * Support having no model
+ * Support replacing the model
+ * Support resetting the model
+
+**States:**
+
+| | |
+|-----------|--------------------------------------------------------------|
+| NO_MODEL  |The model is not set, there is nothing to do                  |
+| PAUSED    |The model is set, but the reflector is not listening          |
+| POPULATED |The initial insertion has been done, it is ready for tracking |
+| TRACKING  |The model is set and the reflector is listening to changes    |
+
+**Actions:**
+
+| | |
+|----------|--------------------------------------------|
+| POPULATE | Fetch the model content and fill the view  |
+| DISABLE  | Disconnect the model tracking              |
+| ENABLE   | Connect the pending model                  |
+| RESET    | Remove the delegates but keep the trackers |
+| FREE     | Free the whole tracking tree               |
+| MOVE     | Try to fix the viewport with content       |
+| TRIM     | Remove the elements until the edge is free |
 
 ---
+
+State trackers: ViewEdge (WIP)
+======
+
+**Purpose:**
+
+* Track the left/right/top/bottom edges of the loaded elements (from the model
+  point of view)
+    * Listed for changes to the StateTracker::Index events and update the edges
+    * Make sure the edges are not corrupted by `rowsMoved` model events
+
+**States:**
+
+TODO (it currently uses imperative logic)
+
+**Actions:**
+
+TODO (it currently uses imperative logic)
+
+**Notes:**
+
+I wont try to make a real state tracker out of this until paging is implemented
+(I will come back to this below).
+
+---
+
+State trackers: Viewport (WIP)
+======
+
+**Purpose:**
+
+* Track if the scrollbar is needed
+* Track when the header and footer widgets are visible
+* Track when the model is too small to fill the view
+
+**States:**
+
+| | |
+|----------|-------------------------------------------------------|
+| UNFILLED | There is less items that the space available          |
+| ANCHORED | Some items are out of view, but it's at the beginning |
+| SCROLLED | It's scrolled to a random point                       |
+| AT_END   | It's at the end of the items                          |
+| ERROR    | Something went wrong                                  |
+
+**Actions:**
+
+| | |
+|----------|--------------------------------------------|
+| INSERTION    | |
+| REMOVAL      | |
+| MOVE         | |
+| RESET_SCROLL | |
+| SCROLL       | |
+
+**Notes:**
+
+I wont try to make a real state tracker out of this until paging is implemented
+(I will come back to this below).
+
+---
+
 
 Optimizations strategies
 ========================
@@ -1329,6 +1428,11 @@ Optimizations strategies: Other
 * [ ] Batch detaching items instead of looping to prevent the feedback loop from
       being ran for nothing and "your neighbor just changed" being executed for
       items about to be removed.
+* [ ] Resume using pages for the geometry state tracker
+    * [ ] Implement the geometry relative to the page
+    * [ ] Move whole pages at once
+    * [ ] Dismiss whole pages at once
+    * [ ] Balance the size pages using runtime introspection
 
 ---
 
@@ -1402,6 +1506,9 @@ Limitations
   CPU overhead. It caused the complexity to skyrocket and I deleted it.
     * It is still the "way to go", but only once everything else is **very**
       mature and unit tested. This should not affect the public API
+    * I also removed the code that delayed refreshing the view in an idle
+      main loop event because it was impossible to debug problems across event
+      loop iterations.
 * The "x" axis has been ignored. No tables for now.
     * QtQuick.TableView works fine
     * It is designed to be added later, but isn't present right now
@@ -1425,6 +1532,8 @@ Not implemented yet
 * Delegate recycling has been gutted for now until I have time to test it
   properly
 * Multiple delegate per model based on conditions
+* All viewport projections except the Cartesian one
+    * It needs to be a new adapter since custom views may need to define it
 
 ---
 
@@ -1438,6 +1547,9 @@ Work in progress
 * Limited real world testing beside the chat app and the integration tests
 * A lot of what I said "has code" but has not been tested because I am not there
   yet (and don't need it in the near term).
+* The code style when I began was for the project I was working on
+    * The code style at the end is closer to Qt
+    * I need to run astyle or something to make it uniform again
 
 ---
 
