@@ -349,12 +349,13 @@ Core:
 * DecorationAdapter
 * ScrollAdapter
 * ContextAdapter
+* ViewportAdapter
+* GeometryAdapter
 
 Related:
 
 * ViewBase
 * Viewport
-* TreeTraversalReflector
 
 ---
 
@@ -369,7 +370,7 @@ Design: Adapters: ModelAdapter
 
 * Attach a model to the other components
 * Support replacing the models
-* Owns the TreeTraversalReflector, the "core" class that tracks all model
+* Owns the StateTracker::Content, the "core" class that tracks all model
   events
 
 **Notes:**
@@ -469,6 +470,52 @@ Design: Adapters: ScrollAdapter
 
 ---
 
+Design: Adapters: ViewportAdapter (WIP)
+======
+
+**Cardinality:** One per model adapter
+
+**Owner:** The model adapter
+
+**Roles:**
+
+* Compute the total size of the view
+* Compute the current visible rectangle compared to the total one
+
+**Note:**
+
+* The default one implements it based on edges, but this isn't general enough
+    * Game engine like B-Tree to split the whole view into small "tiles"
+    * Multithread map-reduce
+    * QAbstractProxyModel
+    * Pure QML implementation
+    * Custom views with custom ViewportAdapter
+    * Using edges (current one)
+    * Using model paging
+* Should eventually have features auto-detection and auto-optimization
+* Really really early work in progress, I hardcoded assumptions everywhere
+
+---
+
+Design: Adapters: GeometryAdapter
+======
+
+**Cardinality:** One per model adapter
+
+**Owner:** The model adapter
+
+**Roles:**
+
+* Define the size (and optionally the position) of a QModelIndex in the view
+
+**Note:**
+
+* There is a complete section about this topic below
+* Use heuristics and introspection to auto-detect the optimal one
+
+---
+
+
 Design: ~~Adapters:~~ Viewport
 ======
 
@@ -480,22 +527,7 @@ Design: ~~Adapters:~~ Viewport
 
 * Track the edge of which part of the model is visible on screen
 * Holds the size hint strategies
-* Be the public API of the TreeTraversalReflector
-
----
-
-Design: ~~Adapters:~~ TreeTraversalReflector
-======
-
-**Cardinality:** One per `Viewport`
-
-**Owner:** The `Viewport`
-
-**Roles:**
-
- * Create a projection on a cartesian plan (viewed by the viewport) of the model
- * Track all model events
- * Drive the state trackers using the model events
+* Be the public API of the StateTracker::Content
 
 ---
 
@@ -549,6 +581,7 @@ State trackers: Overview
  * Context (the ever changing values of the roles)
  * Geometry (the relative and absolute position in the view)
  * Proximity (track if the nearby elements are fully loaded)
+ * Content (listen to model changes affection the viewport)
 
 **Per View:**
 
@@ -849,6 +882,21 @@ I wont try to make a real state tracker out of this until paging is implemented
 
 ---
 
+State trackers: Content
+======
+
+**Cardinality:** One per `Viewport`
+
+**Owner:** The `Viewport`
+
+**Roles:**
+
+ * Create a projection on a cartesian plan (viewed by the viewport) of the model
+ * Track all model events
+ * Drive the state trackers using the model events
+
+---
+
 
 Optimizations strategies
 ========================
@@ -1023,7 +1071,7 @@ Optimizations strategies: Size (and position) hints
 Constraints (2/2):
 
 * Using different adapters and view capabilities requires different metadata
-  at different time
+  at different time (linear, point-cloud, 3D, GIS, zoom-level)
 * Sometime, a QModelIndex "position" in the model has no relation with its
   position in the view
 * Some QModelIndex, such as ones used in QTreeView, have widget decorations
@@ -1051,6 +1099,7 @@ Optimizations strategies: Size (and position) hints
 | ROLE     | Use one of the QAbstractItemModel role as size                 |
 | DELEGATE | Assume the view re-implemented ::sizeHint is correct           |
 | STATIC   | Have a C++ function that return a size per column              |
+| QML      | Implement one inline in your QML file                          |
 
 ---
 
@@ -1213,6 +1262,32 @@ Optimizations strategies: Size (and position) hints
 Optimizations strategies: Size (and position) hints
 ===================================================
 
+**Name:** QML
+
+**Automatic:** no
+
+**Description:** Make a QML friendly version of the C++ API and let them be
+defined in QML or JS code. The "raw" GeometryAdapter API uses flags and some
+protected methods, it's not very QML friendly and making it so would make it
+less flexible. An higher level "QML wrapper" is better.
+
+**Usecase:**
+
+* Quicker to prototype than a C++ implementation
+
+**Pros:**
+
+* Quick prototyping
+
+**Cons:**
+
+* It's a toy at most and wont scale
+
+---
+
+Optimizations strategies: Size (and position) hints
+===================================================
+
 **Name:** Proxy variant 1 (implemented by this framework)
 
 **Automatic:** no
@@ -1248,7 +1323,7 @@ Demonstration
 ---
 
     !js
-    model: KQuickView.SizeHintProxyModel {
+    model: KQuickItemView.SizeHintProxyModel {
         id: proxyModel
 
         /*invalidationRoles: [
@@ -1401,7 +1476,7 @@ Optimizations strategies: Other
     * [X] Stop parsing after the elements stop being visible
     * [ ] Only load the depth chain, not its content (unless visible)
     * [ ] Free memory of invisible QPersistentModelIndex tracker
-    * [ ] Load many TreeTraversalItems at once to mitigate the overhead
+    * [ ] Load many StateTracker::Content at once to mitigate the overhead
         * [ ] Have a state machine for TreeTraversalItemsRange to mutualize range
             operations and move the code away from
             TreeTraversalItems::m_fStateMachine
@@ -1461,10 +1536,10 @@ Optimizations strategies: Other
 
 * [ ] Support Qt::ItemNeverHasChildren Qt::InitialSortOrderRole Qt::SizeHintRole
 * [ ] For non-Cartesian models where QRectF is known, implement tiling.
+* [ ] Convert to Moore state machine and create a multi-thread pipeline
+    * It's unclear if it would actually be faster, more research is needed
 
 ---
-
-
 
 Status
 ======
@@ -1483,6 +1558,7 @@ Status: views
     * [ ] Some Excel charts
     * [ ] CalendarView zoom from years single day
     * [ ] Timeline(tree)/Gantt
+    * [ ] "Breadcrumb" navigation trees (only the selected item is visible)
 * [ ] Radial and 2.5D/3D
     * [ ] HierarchyView
     * [ ] RadialListView
@@ -1540,9 +1616,7 @@ Not implemented yet
 Work in progress
 ================
 
-* Some of the state tracker have more Q_ASSERT and qDebug than lines of "real"
-  code
-* With the optimizations turned on, there is rendering issues
+* With the optimizations turned on, there is minor rendering issues
 * There is tests but not full coverage
 * Limited real world testing beside the chat app and the integration tests
 * A lot of what I said "has code" but has not been tested because I am not there
@@ -1550,6 +1624,21 @@ Work in progress
 * The code style when I began was for the project I was working on
     * The code style at the end is closer to Qt
     * I need to run astyle or something to make it uniform again
+* The selection model support is outdated (but mostly good enough for now)
+    * Operations such as multi-select or selecting out-of-view items doesn't
+      work
+* Cleanup and fix all the memory leaks that have been ignored so far
+
+---
+
+Next major features
+===================
+
+* Implement the ViewportAdapter subsystem with a proper API and optimization
+  strategies
+    * The half implemented current solution prevents items from being GCed too
+* Restore support for delegate recycling (the previous attempt was crashy in
+  QtQuick and I didn't have time to find out why)
 
 ---
 
@@ -1559,8 +1648,9 @@ Time table
 * Oct-Nov 2017: First version which load every single QQuickItem ahead of time
   and is updated for every changes (milestone 1, released, shipped)
 * Sep 2018: Complete the user API (milestone 2, released)
-* Oct-Nov 2018: Implement enough optimizations to ship Ring-KDE 3.1 on mobile
-  (milestone 3, stabilizing, in-progress)
+* Oct-Nov 2018: Implement enough optimizations to ship Ring-KDE 3.0.1 on mobile
+  (milestone 3, released)
+* Nov 30: Tag v0.1
 
 ---
 
