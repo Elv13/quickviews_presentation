@@ -139,6 +139,7 @@ Table of content
  * Public API components (adapters)
  * Private API state trackers
  * Optimization strategies
+ * Views
  * Status, demo, timeline, etc
 
 ---
@@ -1539,6 +1540,77 @@ Optimizations strategies: Other
 * [ ] Convert to Moore state machine and create a multi-thread pipeline
     * It's unclear if it would actually be faster, more research is needed
 
+
+
+---
+
+Views
+=====
+
+---
+
+Views: ListView
+===============
+
+ * Mostly compatible with QtQuick.ListView
+ * Exposes the Categories as a second model
+ * Supports a scrollbar
+
+---
+
+Views: TreeView
+===============
+
+ * It exists!
+
+---
+
+Views: HierarchyView (currently broken)
+=======================================
+
+ * Each children are within the parent delegates
+ * Useful to show groups with drag and drop
+
+(currently regressed since the `ViewportAdapter` hasn't been refactored
+correctly yet)
+
+---
+
+Views: IndexView (1/2)
+======================
+
+ * Show a single QModelIndex from any model
+ * Very useful in mobile scenarios to create pages to display more roles
+ * Also helps to reproduce the "editor widgets" concept from QtWidget
+
+---
+
+Views: IndexView (2/2)
+======================
+
+    !js
+    KQuickItemViews.IndexView {
+        modelIndex: accountTree.selectedAccount.index
+        clip: true
+
+        delegate: RowLayout {
+
+            TextField {
+                id: alias
+                KQuickItemViews.RoleBinder.modelRole: "alias"
+                KQuickItemViews.RoleBinder.objectProperty: "text"
+                Kirigami.FormData.label: i18n("Alias")
+            }
+
+            CheckBox {
+                Kirigami.FormData.label: i18n("upnpEnabled")
+                KQuickItemViews.RoleBinder.modelRole: "isUpnpEnabled"
+                KQuickItemViews.RoleBinder.objectProperty: "checked"
+            }
+
+        }
+    }
+
 ---
 
 Status
@@ -1560,11 +1632,12 @@ Status: views
     * [ ] Timeline(tree)/Gantt
     * [ ] "Breadcrumb" navigation trees (only the selected item is visible)
 * [ ] Radial and 2.5D/3D
-    * [ ] HierarchyView
+    * [/] HierarchyView
     * [ ] RadialListView
     * [ ] FileLight
 * Non item based
     * [ ] Some Excel line graphs
+    * [X] IndexViews
 * [ ] Flow views
     * [ ] Node graph
     * [ ] Pipeline
